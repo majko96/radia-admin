@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Posts{% endblock %}
+
+{% block body %}
+    <div>
+        <div class="container mt-5">
+            <div class="card m-3">
+                <span class="text-center">Posts</span>
+            </div>
+            <div>
+                {% if (posts is defined and posts is not empty) %}
+                    {% for item in posts %}
+                        <div class="card m-3">
+                            <div class="p-3">
+                                <h2>{{ item.title }}</h2>
+                                <p>{{ item.text }}</p>
+                                <p>{{ item.id }}</p>
+                                <p>{{ item.createdAt|date('d.m. Y H:i') }}</p>
+                                <p>{{ item.updatedAt|date('d.m. Y H:i') }}</p>
+                                <a href="{{ path('post_delete', {id: item.id}) }}"> Delete</a>
+                                <a href="{{ path('post_edit', {id: item.id}) }}"> Edit</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <a href='{{ path('test') }}'>Test</a>
+            <a href='{{ path('app_logout') }}'>Log Out</a>
+            <a href='{{ path('post_create') }}'>Create Post</a>
+        </div>
+    </div>
+{% endblock %}

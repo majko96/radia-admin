@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test!{% endblock %}
+
+{% block body %}
+   <div>
+       <div class="container mt-5">
+            <div class="card">
+                <span class="text-center">TEST</span>
+            </div>
+           <a href='{{ path('posts') }}'>Posts</a>
+           <a href='{{ path('app_logout') }}'>Log Out</a>
+       </div>
+   </div>
+{% endblock %}

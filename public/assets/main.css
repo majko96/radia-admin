@@ -1,0 +1,28 @@
+body {
+    background-color: #5eb5e0;
+}
+
+a {
+    color: #000000;
+}
+
+.wrapper {
+    height: 100vh;;
+}
+
+label {
+    margin-top: 0.5rem;
+    margin-bottom: 0 !important;
+}
+
+.login-form {
+    width: 300px;
+    background-color: #B0413E;
+    padding: 20px 30px 20px 30px;
+    color: #DDDDDD;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
