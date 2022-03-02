@@ -16,7 +16,7 @@
                                 <div class="p-3">
                                     <h2>{{ item.title }}</h2>
                                     <p>{{ item.text }}</p>
-                                    <p>POST ID: {{ item.id }}</p>
+                                    <p class="d-none">POST ID: {{ item.id }}</p>
                                     <p>{{ item.createdAt|date('d.m. Y H:i') }}</p>
                                     {% if item.createdAt|date('d.m. Y H:i') is same as item.updatedAt|date('d.m. Y H:i') %}
                                     {% else %}
@@ -30,7 +30,7 @@
                     {% endfor %}
                 {% endif %}
             </div>
-            <div class="navigation d-flex justify-content-center mt-3">
+            <div class="navigation d-flex justify-content-center mt-2">
                 {{ knp_pagination_render(posts, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}
             </div>
             </div>
