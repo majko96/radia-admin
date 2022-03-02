@@ -3,16 +3,6 @@
 {% block title %}Create Post{% endblock %}
 
 {% block body %}
-    <div>
-        <div class="container mt-5">
-            <div class="card">
-                <span class="text-center">Create Post</span>
-                {%- block post_form_widget -%}
-                    {{ form_start(form) }}
-                    {{ form_rest(form) }}
-                    {{ form_end(form) }}
-                {%- endblock post_form_widget -%}
-            </div>
-        </div>
-    </div>
+    {% form_theme form '/form/fields.html.twig' %}
+    {{ form(form,  {'attr': {}}) }}
 {% endblock %}

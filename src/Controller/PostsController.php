@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Form\PostFormType;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Doctrine\Persistence\ManagerRegistry;
@@ -31,19 +32,24 @@ class PostsController extends AbstractController
      * @Route("/posts", name="posts")
      * @IsGranted("ROLE_USER")
      */
-    public function getMyPosts(): Response
+    public function getMyPosts(Request $request, PaginatorInterface $paginator): Response
     {
+        $entityManager = $this->doctrine->getManager();
         $user = $this->security->getUser();
         if (!$user) {
             $data = [];
         } else {
-            $entityManager = $this->doctrine->getManager();
-            $data = $entityManager->getRepository(Post::class)->findBy(['userId' => $user->getId()]);
+            $data = $entityManager->getRepository(Post::class)->findBy(['userId' => $user->getId()], ['id' => 'DESC']);
         }
+        $dataPagination = $paginator->paginate(
+            $data,
+            $request->query->getInt('page', 1),
+            6
+        );
 
         return $this->render('posts/list.html.twig', [
             'controller_name' => 'PostsController',
-            'posts' => $data,
+            'posts' => $dataPagination,
         ]);
     }
 
@@ -111,8 +117,9 @@ class PostsController extends AbstractController
             $post->setUserId($user->getId());
             $post->setTitle($dataFromForm->getTitle());
             $post->setText($dataFromForm->getText());
-            $post->setCreatedAt($dataFromForm->getCreatedAt());
+            $post->setCreatedAt($data->getCreatedAt());
             $post->setUpdatedAt(new \DateTimeImmutable('now + 1 hour'));
+            $entityManager->merge($post);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('posts'), 302);
         }
@@ -139,17 +146,4 @@ class PostsController extends AbstractController
         $entityManager->flush();
         return $this->redirect($this->generateUrl('posts'), 302);
     }
-
-
-    /**
-     * @Route("/test", name="test")
-     * @IsGranted("ROLE_USER")
-     */
-    public function test(): Response
-    {
-        return $this->render('test/test.html.twig', [
-            'controller_name' => 'PostsController',
-        ]);
-    }
-
 }

@@ -1,5 +1,35 @@
 body {
-    background-color: #5eb5e0;
+    background-image: url('./images/bg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    font-family: 'Numans', sans-serif;
+    height: 100%;
+}
+
+.navbar-brand>img {
+    height: 4rem;
+}
+
+.navbar-nav li a {
+    color: #DDDDDD !important;
+}
+
+.navbar-nav li a:hover {
+    color: #f56b6b !important;
+}
+
+hr {
+    display: block;
+    unicode-bidi: isolate;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    overflow: hidden;
+    border-style: inset;
+    border-width: 1px;
 }
 
 a {

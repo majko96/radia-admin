@@ -4,30 +4,36 @@
 
 {% block body %}
     <div>
-        <div class="container mt-5">
-            <div class="card m-3">
-                <span class="text-center">Posts</span>
+        <div class="mt-4">
+            <div class="navigation d-flex justify-content-center mb-2">
+                {{ knp_pagination_render(posts, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}
             </div>
-            <div>
+            <div class="row">
                 {% if (posts is defined and posts is not empty) %}
                     {% for item in posts %}
-                        <div class="card m-3">
-                            <div class="p-3">
-                                <h2>{{ item.title }}</h2>
-                                <p>{{ item.text }}</p>
-                                <p>{{ item.id }}</p>
-                                <p>{{ item.createdAt|date('d.m. Y H:i') }}</p>
-                                <p>{{ item.updatedAt|date('d.m. Y H:i') }}</p>
-                                <a href="{{ path('post_delete', {id: item.id}) }}"> Delete</a>
-                                <a href="{{ path('post_edit', {id: item.id}) }}"> Edit</a>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="p-3">
+                                    <h2>{{ item.title }}</h2>
+                                    <p>{{ item.text }}</p>
+                                    <p>POST ID: {{ item.id }}</p>
+                                    <p>{{ item.createdAt|date('d.m. Y H:i') }}</p>
+                                    {% if item.createdAt|date('d.m. Y H:i') is same as item.updatedAt|date('d.m. Y H:i') %}
+                                    {% else %}
+                                        <p>{{ item.updatedAt|date('d.m. Y H:i') }}</p>
+                                    {% endif %}
+                                    <a href="{{ path('post_delete', {id: item.id}) }}"> Delete</a>
+                                    <a href="{{ path('post_edit', {id: item.id}) }}"> Edit</a>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
                 {% endif %}
             </div>
-            <a href='{{ path('test') }}'>Test</a>
-            <a href='{{ path('app_logout') }}'>Log Out</a>
-            <a href='{{ path('post_create') }}'>Create Post</a>
+            <div class="navigation d-flex justify-content-center mt-3">
+                {{ knp_pagination_render(posts, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}
+            </div>
+            </div>
         </div>
     </div>
 {% endblock %}
