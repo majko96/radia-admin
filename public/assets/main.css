@@ -1,11 +1,12 @@
 body {
-    background-image: url('./images/bg.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
+    background-color: #f2f3f8;
     font-family: 'Numans', sans-serif;
     height: 100%;
+}
+
+.navbar {
+    background-color: #282a3c;
+    min-height: 60px;
 }
 
 .navbar-brand>img {
@@ -13,11 +14,15 @@ body {
 }
 
 .navbar-nav li a {
-    color: #DDDDDD !important;
+    color: #DDDDDD;
 }
 
 .navbar-nav li a:hover {
     color: #f56b6b !important;
+}
+
+.dropdown-menu a {
+    color: #000000 !important;
 }
 
 hr {
@@ -42,7 +47,7 @@ label {
 }
 
 .login-form {
-    width: 300px;
+    width: 360px;
     background-color: rgba(0,0,0,0.8) !important;
     padding: 20px 30px 20px 30px;
     color: #DDDDDD;
@@ -51,4 +56,36 @@ label {
     top: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+}
+
+.table {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.table img {
+    max-height: 50px;
+}
+
+.green {
+    color: #1DB954;
+}
+
+.red {
+    color: #FF0000;
+}
+
+.main-margin-top {
+    margin-top: 100px;
+}
+
+.img-thmb {
+    max-width: 80px;
+}
+
+footer {
+    margin-top: 60px;
+    width: 100%;
+    bottom: 0;
+    height: 60px;
 }

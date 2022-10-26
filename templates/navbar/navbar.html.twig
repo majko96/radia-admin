@@ -1,39 +1,26 @@
-
-<nav class="navbar navbar-expand-sm navbar-dark p-0">
-    <a class="navbar-brand" href="#"><img src="{{ asset('assets/images/logo.png') }}"alt="môj denník">
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    {% if app.user.username is defined %}
-    <div class="collapse navbar-collapse" id="collapsibleNavbar">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('post_create') }}"><i class="fa fa-pencil margin_fa mr-1" aria-hidden="true"></i>&nbsp;Create Post</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('posts') }}"><i class="fa fa-floppy-o margin_fa mr-1" aria-hidden="true"></i>Posts</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><i class="fa fa-user-circle-o mr-1"></i>{{ app.user.username }}</a>
-                <div class="dropdown-menu dropdown-menu-right dropdown-cyan" aria-labelledby="navbarDropdownMenuLink-4">
-{#                    <a class="dropdown-item" href="https://moj-dennik.eu/nastavenia.php">Nastavenia</a>#}
-                    <a class="dropdown-item" href='{{ path('app_logout') }}'>Log Out</a>
+{% set current_path = app.request.get('_route') %}
+<body id="body-pd">
+    <header class="header" id="header">
+        <div class="header_toggle"> <i class='bx bx-menu' id="header-toggle"></i> </div>
+        <div><i class="fa fa-user-circle-o mr-1"></i> {{ app.user.username }}</div>
+    </header>
+    <div class="l-navbar" id="nav-bar">
+        <nav class="nav">
+            <div> <a class="nav_logo"> <i class='bx bx-radio nav_logo-icon'></i> <span class="nav_logo-name">Poslouchej radia</span> </a>
+                <div class="nav_list"> 
+                    <a href="{{ path('radio_list') }}" class="nav_link {% if current_path == 'radio_list' %} active {% endif %}"> 
+                        <i class='bx bx-list-ul nav_icon'></i> 
+                        <span class="nav_name">Radio List</span> 
+                    </a>
+                    <a href="{{ path('radio_add') }}" class="nav_link {% if current_path == 'radio_add' %} active {% endif %}"> 
+                        <i class='bx bx-plus-circle nav_icon'></i> 
+                        <span class="nav_name">Add radio</span>
+                    </a>
+                    <a href="{{ path('change_password') }}" class="nav_link {% if current_path == 'change_password' %} active {% endif %}"> 
+                        <i class='bx bx-user nav_icon'></i> 
+                        <span class="nav_name">Change pass</span> 
+                    </a> 
                 </div>
-            </li>
-        </ul>
+            </div> <a href="{{ path('app_logout') }}" class="nav_link"> <i class='bx bx-log-out nav_icon'></i> <span class="nav_name">SignOut</span> </a>
+        </nav>
     </div>
-    {% else %}
-    <div class="collapse navbar-collapse" id="collapsibleNavbar">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('app_login') }}"></i>Contact</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('app_login') }}"></i>Login</a>
-            </li>
-        </ul>
-    </div>
-    {% endif %}
-</nav>
-<hr>

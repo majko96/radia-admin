@@ -1,13 +1,1 @@
 {% extends 'bootstrap_5_layout.html.twig' %}
-
-{%- block post_form_widget -%}
-    <div class="card p-3">
-        {{ form_start(form) }}
-        {{ form_row(form.title) }}
-        {{ form_row(form.text) }}
-        <div class="text-center">
-            {{ form_row(form.save) }}
-        </div>
-        {{ form_end(form) }}
-    </div>
-{%- endblock post_form_widget -%}
