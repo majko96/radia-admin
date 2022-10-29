@@ -89,3 +89,8 @@ footer {
     bottom: 0;
     height: 60px;
 }
+
+.user_block {
+    display: flex;
+    align-items: center;
+}

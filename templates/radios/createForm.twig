@@ -8,10 +8,15 @@
     </div>
     {% if isGranted == true %}
     <div class="d-flex justify-content-end">
-    <a class="btn btn-danger"
+    <a class="btn btn-danger me-2"
        onclick="return confirm('Naozaj chcete vymazať rádio?')"
        href="{{ path('radio_delete', {id: id}) }}">
         <i class="fa-solid fa-trash-can"></i> Delete</a>
+        <a class="btn btn-primary d-flex"
+           id="playText"
+           onclick="playRadio();"
+           >
+            <i class="bx bx-play-circle bx-sm"></i>&nbsp;Play</a>
     </div>
     {% endif %}
     {% else %}
@@ -37,4 +42,10 @@
         {% endif %}
         {{ form_end(form, {'render_rest': false}) }}
     </div>
+
+    <script>
+        function playRadio() {
+            window.open('{{ form.vars.value.url }}', 'player',  'width=300, height=150');
+        }
+    </script>
 {% endblock %}
