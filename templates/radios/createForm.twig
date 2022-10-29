@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% form_theme form '/form/fields.html.twig' %}
+    {% if id is defined %}
+    <div>
+        <small class="text-secondary">Edit | Station</small>
+    </div>
+    {% if isGranted == true %}
+    <div class="d-flex justify-content-end">
+    <a class="btn btn-danger"
+       onclick="return confirm('Naozaj chcete vymazať rádio?')"
+       href="{{ path('radio_delete', {id: id}) }}">
+        <i class="fa-solid fa-trash-can"></i> Delete</a>
+    </div>
+    {% endif %}
+    {% else %}
+    <div>
+        <small class="text-secondary">Add | Station</small>
+    </div>
+    {% endif %}
+    <div class="card p-5 mt-4 mb-5">
+    {% if id is defined and id is not empty %}
+        <img class="img-fluid img-thmb" src="{{ form.vars.value.img }}" alt="radio-image">
+    {% else %}
+    {% endif %}
+        {{ form_start(form) }}
+        {{ form_row(form.title) }}
+        {{ form_row(form.url) }}
+        {{ form_row(form.img) }}
+        {{ form_row(form.country) }}
+        {{ form_row(form.style) }}
+        {{ form_row(form.top) }}
+        {{ form_row(form.ordering) }}
+        {% if isGranted == true %}
+            {{ form_row(form.save) }}
+        {% endif %}
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+{% endblock %}

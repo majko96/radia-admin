@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Classes\ChangePassword;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -31,7 +32,7 @@ class ChangePasswordType extends AbstractType
         ));
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'change_passwd';
     }

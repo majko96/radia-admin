@@ -19,6 +19,8 @@ class RadioController extends AbstractController
 
     public ManagerRegistry $doctrine;
     public Security $security;
+    private const DEFAULT_PER_PAGE = 50;
+    private const ROLE_ADMIN = 'ROLE_ADMIN';
 
     public function __construct(
         ManagerRegistry $doctrine,
@@ -40,42 +42,59 @@ class RadioController extends AbstractController
         $style = $request->query->get('style');
         $top = $request->query->getBoolean('top');
         $title = $request->query->get('title');
-        if (($style !== 'null' && $style !== null) && ($country !== 'null' && $country !== null) && ($top) && (!$title)) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['style' => $style, 'country' => $country, 'top' => $top,], ['ordering' => 'asc']);
+        if ($style && $country && $top && !$title) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['style' => $style, 'country' => $country, 'top' => $top,],
+                ['ordering' => 'asc']
+            );
         } 
         else if ($title) {
-            $qb = $entityManager->getRepository(Station::class)->createQueryBuilder('u')->where('u.title like :radioTitle');
+            $qb = $entityManager->getRepository(
+                Station::class)->createQueryBuilder('u')->where('u.title like :radioTitle');
             if ($top) {
                 $qb->andWhere('u.top = 1');
             } 
-            if ($country !== 'null' && $country !== null ) {
+            if ($country) {
                 $qb->andWhere('u.country like :radioCountry');
                 $qb->setParameter('radioCountry','%' . $country . '%');
             } 
-            if ($style!== 'null' && $style !== null ) {
+            if ($style){
                 $qb->andWhere('u.style like :radioStyle');
                 $qb->setParameter('radioStyle','%' . $style . '%');
             } 
             $qb->setParameter('radioTitle','%' . $title . '%');
             $entity = $qb->getQuery()->getResult();
         }
-        else if (($style !== 'null' && $style !== null) && ($country !== 'null' && $country !== null)) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['style' => $style, 'country' => $country]);
+        else if ($style && $country) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['style' => $style, 'country' => $country]
+            );
         } 
-        else if ($country !== 'null' && $country !== null && ($top)) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['country' => $country, 'top' => $top,], ['ordering' => 'asc']);
+        else if ($country && $top) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['country' => $country, 'top' => $top,],
+                ['ordering' => 'asc']
+            );
         } 
-        else if ($style !== 'null' && $style !== null && ($top)) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['style' => $style, 'top' => $top,]);
+        else if ($style && $top) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['style' => $style, 'top' => $top,]
+            );
         }
-        else if ($country !== 'null' && $country !== null ) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['country' => $country]);
+        else if ($country) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['country' => $country]
+            );
         } 
-        else if ($style !== 'null' && $style !== null ) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['style' => $style]);
+        else if ($style) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['style' => $style]
+            );
         }
         else if ($top) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(['top' => $top]);
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                ['top' => $top]
+            );
         }
         else {
             $entity = $entityManager->getRepository(Station::class)->findAll();
@@ -84,23 +103,29 @@ class RadioController extends AbstractController
         $dataPagination = $paginator->paginate(
             $entity,
             $request->query->getInt('page', 1),
-            50
+            self::DEFAULT_PER_PAGE
         );
 
-        return $this->render('posts/radioList.html.twig', [
+        return $this->render('radios/radioList.html.twig', [
             'controller_name' => 'PostsController',
-            'posts' => $dataPagination,
+            'radios' => $dataPagination,
             'totalCount' => $dataPagination->getTotalItemCount(),
             'form' => $form->createView(),
         ]);
     }
+
 
     /**
      * @Route("/radio-edit/{id}", name="radio_edit")
      * @IsGranted("ROLE_USER")
      */
     public function editRadio(Request $request): Response
-    { 
+    {
+        $isGranted = false;
+        if (in_array(self::ROLE_ADMIN, $this->getUser()->getRoles(), true)) {
+            $isGranted = true;
+        }
+
         $id = $request->get('id');
         $entityManager = $this->doctrine->getManager();
 
@@ -114,26 +139,31 @@ class RadioController extends AbstractController
         }
 
         return $this->render(
-            'posts/create.html.twig',
+            'radios/createForm.twig',
             [
                 'form' => $form->createView(),
-                'id' => $id
+                'id' => $id,
+                'isGranted' => $isGranted
             ]
         );
     }
 
 
-     /**
+    /**
      * @Route("/radio-add", name="radio_add")
      * @IsGranted("ROLE_USER")
+     * @throws \Exception
      */
     public function addRadio(Request $request): Response
     {
+        $isGranted = false;
+        if (in_array(self::ROLE_ADMIN, $this->getUser()->getRoles(), true)) {
+            $isGranted = true;
+        }
         $form = $this->createForm(RadioFormType::class, []);
         $entityManager = $this->doctrine->getManager();
 
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $dataFromForm = $form->getData();
             $station = new Station();
@@ -144,16 +174,20 @@ class RadioController extends AbstractController
             $station->setStyle($dataFromForm['style']);
             $station->setTop($dataFromForm['top']);
             $station->setOrdering($dataFromForm['ordering']);
-            $station->setCreatedAt(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Bratislava')));
+            $station->setCreatedAt(
+                    new \DateTimeImmutable('now',
+                    new \DateTimeZone('Europe/Bratislava')
+                ));
             $entityManager->persist($station);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('radio_list'), 302);
         }
 
         return $this->render(
-            'posts/create.html.twig',
+            'radios/createForm.twig',
             [
                 'form' => $form->createView(),
+                'isGranted' => $isGranted
             ]
         );
     }
@@ -172,6 +206,4 @@ class RadioController extends AbstractController
         $entityManager->flush();
         return $this->redirect($this->generateUrl('radio_list'), 302);
     }
-
-
 }

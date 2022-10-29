@@ -71,7 +71,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('radio_list');
         }
 
-        return $this->render('registration/change_password.html.twig', array(
+        return $this->render('registration/changePassword.twig', array(
             'changePasswordForm' => $form->createView(),
         ));        
     }

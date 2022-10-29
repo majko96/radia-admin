@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div>
+        <small class="text-secondary">Radio stations | List</small>
+    <div class="mt-3">
+        <h5>Filter</h5>
+    </div>
+    {{ form_start(form) }}
+    <div class="my-custom-class-for-errors">
+        {{ form_errors(form) }}
+    </div>
+    <div class="row">
+        <div class="col">
+            {{ form_row(form.country) }}
+        </div>
+        <div class="col" id="some-custom-id">
+            {{ form_row(form.style) }}
+        </div>
+        <div class="col" id="some-custom-id">
+            {{ form_row(form.top) }}
+        </div>
+    </div>
+    {{ form_end(form) }}
+    <div class="mb-5">
+        <a class="btn btn-primary" onClick="filter()"><i class="fa-solid fa-magnifying-glass"></i> Filter</a>
+        <a class="btn btn-primary" onClick="resetFilter()"><i class="fa fa-times"></i> Reset</a>
+    </div>
+        <small>Total count: {{totalCount}}</small>
+        <hr>
+    <div class="d-flex justify-content-end">
+        <a class="btn btn-primary" href="{{ path('radio_add') }}"><i class="fa-solid fa-plus"></i> Add new</a>
+    </div>
+    </div>
+        <div class="mt-4">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ knp_pagination_sortable(radios, 'ID', 'id') }}</th>
+                            <th scope="col"></th>
+                            <th scope="col">{{ knp_pagination_sortable(radios, 'Title', 'title') }}</th>
+                            <th class="text-center" scope="col">Country</th>
+                            <th class="text-center"  scope="col">Style</th>
+                            <th class="text-center" scope="col">Top</th>
+                            <th class="text-center" scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if (radios is defined and radios is not empty) %}
+                            {% for item in radios %}
+                                <tr>
+                                    <td class="align-middle text-center">{{ item.id }}</td>
+                                    <td class="align-middle text-center"><img src="{{ item.img}}" alt="radio"></td>
+                                    <td class="align-middle">{{ item.title }}</td>
+                                    <td class="align-middle text-center">{{ item.country }}</td>
+                                    {% if item.style is not empty %}
+                                    <td class="align-middle text-center">{{ item.style}}</td>
+                                    {% else %}
+                                    <td class="align-middle text-center">-</td>
+                                    {% endif %}
+                                    {% if item.top == 1 %}
+                                    <td class="align-middle text-center"><i class="fa-solid fa-check green"></i></td>
+                                    {% else %}
+                                    <td class="align-middle text-center"><i class="fa-solid fa-xmark red"></i></td>
+                                    {% endif %}
+                                    <td class="align-middle text-center">
+                                        <a href="{{ path('radio_edit', {id: item.id}) }}">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="navigation d-flex justify-content-center mt-5">
+                {{ knp_pagination_render(radios, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}
+            </div>
+            </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const params = new URLSearchParams(document.location.search);
+        const country = params.get("country");
+        const style = params.get("style");
+        const top = params.get("top");
+        const title = params.get("title");
+        if (country) {
+            document.getElementById('radio_filter_form_country').value = country;
+        }
+        if (style) {
+            document.getElementById('radio_filter_form_style').value = style;
+        }
+        if (top) {
+            document.getElementById('radio_filter_form_top').value = top;
+        }
+        if (title) {
+            document.getElementById('radio_filter_form_searchByTitle').value = title;
+        }
+    });
+
+    function filter() {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        params.delete('country');
+        params.delete('style');
+        params.delete('top');
+        params.delete('page');
+        params.delete('title');
+        const country = document.getElementById('radio_filter_form_country').value;
+        const style = document.getElementById('radio_filter_form_style').value;
+        const top = document.getElementById('radio_filter_form_top').value;
+        const title = document.getElementById('radio_filter_form_searchByTitle').value;
+        if (country !== 'null') {
+            params.set('country', country);
+        }
+        if (style !== 'null') {
+            params.set('style', style);
+        }
+        if (top) {
+            params.set('top', top);
+        }
+        if (title !== '') {
+            params.set('title', title);
+        }
+        window.location  = '?' + params;
+    }
+
+    function resetFilter() {
+        document.getElementById('radio_filter_form_country').value = null;
+        document.getElementById('radio_filter_form_style').value = null;
+        document.getElementById('radio_filter_form_top').value = null;
+        document.getElementById('radio_filter_form_searchByTitle').value = null;
+        filter();
+    }
+    </script>
+{% endblock %}
