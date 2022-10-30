@@ -57,6 +57,16 @@ class Station
      */
     private $createdAt;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $status;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $lastChecked;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,6 +164,30 @@ class Station
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getLastChecked(): ?\DateTimeInterface
+    {
+        return $this->lastChecked;
+    }
+
+    public function setLastChecked(\DateTimeInterface $lastChecked): self
+    {
+        $this->lastChecked = $lastChecked;
 
         return $this;
     }

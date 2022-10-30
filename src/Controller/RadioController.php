@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Station;
 use App\Form\RadioFormType;
 use App\Form\RadioFilterFormType;
+use Exception;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Doctrine\Persistence\ManagerRegistry;
@@ -152,7 +154,7 @@ class RadioController extends AbstractController
     /**
      * @Route("/radio-add", name="radio_add")
      * @IsGranted("ROLE_USER")
-     * @throws \Exception
+     * @throws Exception
      */
     public function addRadio(Request $request): Response
     {
@@ -205,5 +207,42 @@ class RadioController extends AbstractController
         $entityManager->remove($entity);
         $entityManager->flush();
         return $this->redirect($this->generateUrl('radio_list'), 302);
+    }
+
+    /**
+     * @Route("/radio-reload", name="radio_reload")
+     * @throws Exception
+     */
+    public function reloadRadio(Request $request): JsonResponse
+    {
+        $entityManager = $this->doctrine->getManager();
+        $entity = $entityManager->getRepository(Station::class)->findAll();
+
+        foreach ($entity as $station) {
+            $domain = $station->getUrl();
+            $curlInit = curl_init($domain);
+            curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
+            curl_setopt($curlInit,CURLOPT_HEADER,true);
+            curl_setopt($curlInit,CURLOPT_NOBODY,true);
+            curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
+            $response = curl_exec($curlInit);
+
+            if ($response) {
+                $station->setStatus(1);
+                $station->setLastChecked(
+                    new \DateTimeImmutable('now',
+                        new \DateTimeZone('Europe/Bratislava')
+                    ));
+                $entityManager->flush();
+            } else {
+                $station->setStatus(0);
+                $station->setLastChecked(
+                    new \DateTimeImmutable('now',
+                        new \DateTimeZone('Europe/Bratislava')
+                    ));
+                $entityManager->flush();
+            }
+        }
+        return new JsonResponse(true, 200, []);
     }
 }
