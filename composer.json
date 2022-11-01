@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8",
         "ext-ctype": "*",
+        "ext-curl": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "^2.5",
         "doctrine/doctrine-migrations-bundle": "^3.2",
@@ -22,6 +23,7 @@
         "symfony/proxy-manager-bridge": "5.4.*",
         "symfony/runtime": "5.4.*",
         "symfony/security-bundle": "5.4.*",
+        "symfony/serializer": "5.4.*",
         "symfony/validator": "5.4.*",
         "symfony/yaml": "5.4.*"
     },
