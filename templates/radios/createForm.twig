@@ -53,7 +53,7 @@
             window.open('{{ form.vars.value.url }}', 'player',  'width=300, height=150');
         }
 
-        $("reload").click(function(e) {
+        $("#reload").click(function(e) {
             e.preventDefault();
             var ajaxTime = new Date().getTime();
             $.ajax({
