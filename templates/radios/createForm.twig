@@ -42,6 +42,7 @@
         {% if isGranted == true %}
             {{ form_row(form.save) }}
         {% endif %}
+        {{ form_rest(form) }}
         {{ form_end(form, {'render_rest': false}) }}
     </div>
 
