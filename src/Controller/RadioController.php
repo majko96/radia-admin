@@ -118,10 +118,10 @@ class RadioController extends AbstractController
 
 
     /**
-     * @Route("/radio-edit/{id}", name="radio_edit")
+     * @Route("/radio-edit/{id}/{back}", name="radio_edit")
      * @IsGranted("ROLE_USER")
      */
-    public function editRadio(Request $request): Response
+    public function editRadio(Request $request, $back): Response
     {
         $isGranted = false;
         if (in_array(self::ROLE_ADMIN, $this->getUser()->getRoles(), true)) {
@@ -137,7 +137,9 @@ class RadioController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-            return $this->redirect($this->generateUrl('radio_list'), 302);
+            $baseUrl = $request->getSchemeAndHttpHost();
+            $route = $this->generateUrl('radio_list');
+            return $this->redirect($baseUrl . $route . '/?' . $back);
         }
 
         return $this->render(

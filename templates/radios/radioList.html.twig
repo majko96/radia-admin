@@ -73,11 +73,21 @@
                                         <td class="align-middle text-center"><i class="fa-solid fa-xmark red"></i></td>
                                     {% endif %}
                                     <td class="align-middle text-center">{{ item.lastChecked|date('d.m.Y H:i:s')}}</td>
-                                    <td class="align-middle text-center">
-                                        <a href="{{ path('radio_edit', {id: item.id}) }}">
-                                            <i class="fa-solid fa-pen-to-square"></i> Edit
-                                        </a>
-                                    </td>
+                                    {% set urlParams =  app.request.query.all|url_encode %}
+                                    {% if urlParams is not empty %}
+                                        <td class="align-middle text-center">
+                                            <a href="{{ path('radio_edit', {id: item.id, back: urlParams}) }}">
+                                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                            </a>
+                                        </td>
+                                        {% else %}
+                                            <td class="align-middle text-center">
+                                                <a href="{{ path('radio_edit', {id: item.id, back: 'null'}) }}">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                </a>
+                                            </td>
+                                    {% endif %}
+
                                 </tr>
                             {% endfor %}
                         {% endif %}
