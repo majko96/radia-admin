@@ -62,7 +62,7 @@
                                     <td class="align-middle text-center"><img src="{{ item.img}}" alt="radio"></td>
                                     <td class="align-middle">{{ item.title }}</td>
                                     <td class="align-middle text-center">{{ item.country }}</td>
-                                    {% if item.style is not empty %}
+                                    {% if item.style is not empty and item.style != 'null' %}
                                     <td class="align-middle text-center">{{ item.style}}</td>
                                     {% else %}
                                     <td class="align-middle text-center">-</td>

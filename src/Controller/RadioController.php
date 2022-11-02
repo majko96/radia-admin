@@ -267,6 +267,20 @@ class RadioController extends AbstractController
         curl_setopt($curlInit,CURLOPT_NOBODY,true);
         curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
         $response = curl_exec($curlInit);
+        if (!$response) {
+            $headers = get_headers($domain);
+            if (isset($headers[0])){
+                if (str_contains($headers[0], '200')) {
+                    $station->setStatus(1);
+                    $station->setLastChecked(
+                        new \DateTimeImmutable('now',
+                            new \DateTimeZone('Europe/Bratislava')
+                        ));
+                    $entityManager->flush();
+                    return new JsonResponse(true, 200, []);
+                }
+            }
+        }
 
         if ($response) {
             $station->setStatus(1);
