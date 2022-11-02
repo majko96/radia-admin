@@ -139,6 +139,7 @@ class RadioController extends AbstractController
             $entityManager->flush();
             $baseUrl = $request->getSchemeAndHttpHost();
             $route = $this->generateUrl('radio_list');
+            $this->addFlash('success', 'Station edited successfully.');
             return $this->redirect($baseUrl . $route . '/?' . $back);
         }
 
@@ -184,6 +185,7 @@ class RadioController extends AbstractController
                 ));
             $entityManager->persist($station);
             $entityManager->flush();
+            $this->addFlash('success', 'Station created successfully.');
             return $this->redirect($this->generateUrl('radio_list'), 302);
         }
 
