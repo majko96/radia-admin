@@ -249,4 +249,40 @@ class RadioController extends AbstractController
         }
         return new JsonResponse(true, 200, []);
     }
+
+    /**
+     * @Route("/radio-reload-single/{id}", name="radio_reload_single")
+     * @throws Exception
+     */
+    public function reloadRadioSingle(Request $request): JsonResponse
+    {
+        $entityManager = $this->doctrine->getManager();
+        $id = $request->get('id');
+        $station = $entityManager->getRepository(Station::class)->findBy(['id' => $id])[0];
+
+        $domain = $station->getUrl();
+        $curlInit = curl_init($domain);
+        curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
+        curl_setopt($curlInit,CURLOPT_HEADER,true);
+        curl_setopt($curlInit,CURLOPT_NOBODY,true);
+        curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
+        $response = curl_exec($curlInit);
+
+        if ($response) {
+            $station->setStatus(1);
+            $station->setLastChecked(
+                new \DateTimeImmutable('now',
+                    new \DateTimeZone('Europe/Bratislava')
+                ));
+            $entityManager->flush();
+        } else {
+            $station->setStatus(0);
+            $station->setLastChecked(
+                new \DateTimeImmutable('now',
+                    new \DateTimeZone('Europe/Bratislava')
+                ));
+            $entityManager->flush();
+        }
+        return new JsonResponse(true, 200, []);
+    }
 }

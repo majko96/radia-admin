@@ -13,6 +13,7 @@
        href="{{ path('radio_delete', {id: id}) }}">
         <i class="fa-solid fa-trash-can"></i> Delete</a>
         {% if id is defined %}
+            <button class="btn btn-warning me-2" id="reload"><i id="spinner" class="fa fa-spinner"></i> Reload status</button>
         <a class="btn btn-primary d-flex"
            id="playText"
            onclick="playRadio();"
@@ -51,6 +52,34 @@
         function playRadio() {
             window.open('{{ form.vars.value.url }}', 'player',  'width=300, height=150');
         }
+
+        $("button").click(function(e) {
+            e.preventDefault();
+            var ajaxTime = new Date().getTime();
+            $.ajax({
+                type: 'GET',
+                url: "/radio-reload-single/{{ id }}",
+                cors: true,
+                contentType: 'application/json',
+                secure: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                },
+                beforeSend: function () {
+                    $('#spinner').addClass('fa-spin');
+                },
+                success: function () {
+                    $('#spinner').removeClass('fa-spin');
+                    var totalTime = new Date().getTime() - ajaxTime;
+                    console.log(totalTime);
+                    alert('ok');
+                },
+                error: function () {
+                    $('#spinner').removeClass('fa-spin');
+                    alert('error');
+                }
+            });
+        });
     </script>
     {% endif %}
 {% endblock %}
