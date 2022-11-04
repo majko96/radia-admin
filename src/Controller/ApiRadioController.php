@@ -40,6 +40,7 @@ class ApiRadioController extends AbstractController
         $style = $request->query->get('style');
         $top = $request->query->getBoolean('top');
         $title = $request->query->get('title');
+        $recent = $request->query->getBoolean('recent');
         if ($style && $country && $top && !$title) {
             $entity = $entityManager->getRepository(Station::class)->findBy(
                 ['style' => $style, 'country' => $country, 'top' => $top,],
@@ -86,6 +87,12 @@ class ApiRadioController extends AbstractController
             $entity = $entityManager->getRepository(Station::class)->findBy(
                 ['top' => $top]
             );
+        } else if ($recent) {
+            $entity = $entityManager->getRepository(Station::class)->findBy(
+                [],
+                ['createdAt' => 'desc']
+            );
+            $entity = array_slice($entity, 0, 20 );
         } else {
             $entity = $entityManager->getRepository(Station::class)->findAll();
         }
