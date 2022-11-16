@@ -8,6 +8,6 @@
 /var/
 /vendor/
 .idea
+.env
+config/packages/doctrine.yaml
 ###< symfony/framework-bundle ###
-/.env
-/config/packages/doctrine.yaml
