@@ -63,6 +63,12 @@ class RadioFormType extends AbstractType
             ->add('ordering', IntegerType::class, [
                 'required' => false
             ])
+            ->add('status', ChoiceType::class, [
+                'choices' => [
+                    'Active' => true,
+                    'Inactive' => false,
+                ]
+            ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-success'],
             ]);
