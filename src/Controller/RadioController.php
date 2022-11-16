@@ -230,21 +230,34 @@ class RadioController extends AbstractController
             curl_setopt($curlInit,CURLOPT_NOBODY,true);
             curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
             $response = curl_exec($curlInit);
+            $headers = false;
+            if (!$response) {
+                try {
+                    $headers = get_headers($domain);
+                    if (isset($headers[0])){
+                        if (str_contains($headers[0], '200')) {
+                            $station->setStatus(1);
+                        }
+                    }
+                } catch (Exception $e) {
+                    $station->setStatus(0);
+                }
+            }
             if ($response) {
                 $station->setStatus(1);
-                $station->setLastChecked(
-                    new \DateTimeImmutable('now',
-                        new \DateTimeZone('Europe/Bratislava')
-                    ));
-                $entityManager->flush();
-            } else {
-                $station->setStatus(0);
-                $station->setLastChecked(
-                    new \DateTimeImmutable('now',
-                        new \DateTimeZone('Europe/Bratislava')
-                    ));
-                $entityManager->flush();
             }
+            if ($response && !$headers) {
+                $station->setStatus(1);
+            }
+            if (!$response && !$headers) {
+                $station->setStatus(0);
+            }
+
+            $station->setLastChecked(
+                new \DateTimeImmutable('now',
+                    new \DateTimeZone('Europe/Bratislava')
+                ));
+            $entityManager->flush();
         }
         return new JsonResponse(true, 200, []);
     }
@@ -258,44 +271,45 @@ class RadioController extends AbstractController
         $entityManager = $this->doctrine->getManager();
         $id = $request->get('id');
         $station = $entityManager->getRepository(Station::class)->findBy(['id' => $id])[0];
-
+        $station->setLastChecked(
+            new \DateTimeImmutable('now',
+                new \DateTimeZone('Europe/Bratislava')
+            ));
         $domain = $station->getUrl();
         $curlInit = curl_init($domain);
+        $headers = false;
         curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
         curl_setopt($curlInit,CURLOPT_HEADER,true);
         curl_setopt($curlInit,CURLOPT_NOBODY,true);
         curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
-        $response = curl_exec($curlInit);
+        try {
+            $response = curl_exec($curlInit);
+        } catch (Exception $e) {
+            $response = false;
+        }
         if (!$response) {
-            $headers = get_headers($domain);
-            if (isset($headers[0])){
-                if (str_contains($headers[0], '200')) {
-                    $station->setStatus(1);
-                    $station->setLastChecked(
-                        new \DateTimeImmutable('now',
-                            new \DateTimeZone('Europe/Bratislava')
-                        ));
-                    $entityManager->flush();
-                    return new JsonResponse(true, 200, []);
+            try {
+                $headers = get_headers($domain);
+                if (isset($headers[0])){
+                    if (str_contains($headers[0], '200')) {
+                        $station->setStatus(1);
+                    }
                 }
+            } catch (Exception $e) {
+                $station->setStatus(0);
             }
         }
 
         if ($response) {
             $station->setStatus(1);
-            $station->setLastChecked(
-                new \DateTimeImmutable('now',
-                    new \DateTimeZone('Europe/Bratislava')
-                ));
-            $entityManager->flush();
-        } else {
-            $station->setStatus(0);
-            $station->setLastChecked(
-                new \DateTimeImmutable('now',
-                    new \DateTimeZone('Europe/Bratislava')
-                ));
-            $entityManager->flush();
         }
+        if ($response && !$headers) {
+            $station->setStatus(1);
+        }
+        if (!$response && !$headers) {
+            $station->setStatus(0);
+        }
+        $entityManager->flush();
         return new JsonResponse(true, 200, []);
     }
 }
