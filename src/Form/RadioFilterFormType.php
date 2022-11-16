@@ -30,6 +30,7 @@ class RadioFilterFormType extends AbstractType
                     'UK' => 'uk',
                     'FR' => 'fr',
                     'AU' => 'au',
+                    'SLO' => 'slo',
                     'OTHER' => 'other'
                 ]
             ])
