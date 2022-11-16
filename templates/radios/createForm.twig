@@ -33,14 +33,20 @@
     {% else %}
     {% endif %}
         {{ form_start(form) }}
-        {{ form_row(form.title) }}
-        {{ form_row(form.url) }}
-        {{ form_row(form.img) }}
-        {{ form_row(form.country) }}
-        {{ form_row(form.style) }}
-        {{ form_row(form.top) }}
-        {{ form_row(form.ordering) }}
-        {{ form_row(form.status) }}
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_row(form.title) }}
+                {{ form_row(form.url) }}
+                {{ form_row(form.img) }}
+                {{ form_row(form.country) }}
+            </div>
+            <div class="col-md-6">
+                {{ form_row(form.style) }}
+                {{ form_row(form.top) }}
+                {{ form_row(form.ordering) }}
+                {{ form_row(form.status) }}
+            </div>
+        </div>
         {% if isGranted == true %}
             {{ form_row(form.save) }}
         {% endif %}
