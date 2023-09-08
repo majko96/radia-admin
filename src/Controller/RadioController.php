@@ -54,6 +54,7 @@ class RadioController extends AbstractController
         }
         if ($top) {
             $qb->andWhere('u.top = 1');
+            $qb->orderBy('u.ordering', 'ASC');
         }
         if ($country) {
             $qb->andWhere('u.country like :radioCountry');
