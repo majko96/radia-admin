@@ -20,6 +20,9 @@
         <div class="col" id="some-custom-id">
             {{ form_row(form.top) }}
         </div>
+        <div class="col" id="some-custom-id">
+            {{ form_row(form.status) }}
+        </div>
     </div>
     {{ form_end(form) }}
     <div class="mb-5">
@@ -28,8 +31,8 @@
     </div>
         <small>Total count: {{totalCount}}</small>
         <hr>
-    <div class="d-flex justify-content-between">
-        <button class="btn btn-warning" id="reload"><i id="spinner" class="fa fa-spinner"></i> Reload status</button>
+    <div class="d-flex justify-content-end">
+{#        <button class="btn btn-warning" id="reload"><i id="spinner" class="fa fa-spinner"></i> Reload status</button>#}
         <a class="btn btn-primary me-2" href="{{ path('radio_add') }}"><i class="fa-solid fa-plus"></i> Add new</a>
     </div>
     </div>
@@ -43,7 +46,7 @@
                 <table class="table table-sm">
                     <thead>
                         <tr>
-                            <th scope="col">{{ knp_pagination_sortable(radios, 'ID', 'id') }}</th>
+                            <th scope="col" style="min-width: 35px;">{{ knp_pagination_sortable(radios, 'ID', 'id') }}</th>
                             <th scope="col"></th>
                             <th scope="col">{{ knp_pagination_sortable(radios, 'Title', 'title') }}</th>
                             <th class="text-center" scope="col">Country</th>
@@ -77,17 +80,37 @@
                                     {% else %}
                                         <td class="align-middle text-center"><i class="fa-solid fa-xmark red"></i></td>
                                     {% endif %}
-                                    <td class="align-middle text-center">{{ item.lastChecked|date('d.m.Y H:i:s')}}</td>
+                                    {% if item.lastChecked is not empty and item.lastChecked != 'null' %}
+                                        <td class="align-middle text-center">{{ item.lastChecked|date('d.m.Y H:i:s')}}</td>
+                                    {% else %}
+                                        <td class="align-middle text-center">-</td>
+                                    {% endif %}
                                     {% set urlParams =  app.request.query.all|url_encode %}
                                     {% if urlParams is not empty %}
                                         <td class="align-middle text-center">
-                                            <a href="{{ path('radio_edit', {id: item.id, back: urlParams}) }}">
+                                            <a id="playText"
+                                               onclick="playRadio('{{ item.url }}');"
+                                            >
+                                                <i class="bx bx-play-circle"></i>&nbsp;Play
+                                            </a>
+                                            <a href="{{ path('radio_edit', {id: item.id, back: urlParams}) }}"
+                                               target="_blank"
+                                               class="ms-2"
+                                            >
                                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                                             </a>
                                         </td>
                                         {% else %}
                                             <td class="align-middle text-center">
-                                                <a href="{{ path('radio_edit', {id: item.id, back: 'null'}) }}">
+                                                <a id="playText"
+                                                   onclick="playRadio('{{ item.url }}');"
+                                                >
+                                                    <i class="bx bx-play-circle"></i>&nbsp;Play
+                                                </a>
+                                                <a href="{{ path('radio_edit', {id: item.id, back: 'null'}) }}"
+                                                   target="_blank"
+                                                   class="ms-2"
+                                                >
                                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </a>
                                             </td>
@@ -105,88 +128,102 @@
             </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function(){
-        const params = new URLSearchParams(document.location.search);
-        const country = params.get("country");
-        const style = params.get("style");
-        const top = params.get("top");
-        const title = params.get("title");
-        if (country) {
-            document.getElementById('radio_filter_form_country').value = country;
+        function playRadio(url) {
+            window.open(url, 'player',  'width=300, height=150');
         }
-        if (style) {
-            document.getElementById('radio_filter_form_style').value = style;
-        }
-        if (top) {
-            document.getElementById('radio_filter_form_top').value = top;
-        }
-        if (title) {
-            document.getElementById('radio_filter_form_searchByTitle').value = title;
-        }
-    });
 
-    function filter() {
-        const url = new URL(window.location.href);
-        const params = new URLSearchParams(url.search);
-        params.delete('country');
-        params.delete('style');
-        params.delete('top');
-        params.delete('page');
-        params.delete('title');
-        const country = document.getElementById('radio_filter_form_country').value;
-        const style = document.getElementById('radio_filter_form_style').value;
-        const top = document.getElementById('radio_filter_form_top').value;
-        const title = document.getElementById('radio_filter_form_searchByTitle').value;
-        if (country !== 'null') {
-            params.set('country', country);
-        }
-        if (style !== 'null') {
-            params.set('style', style);
-        }
-        if (top) {
-            params.set('top', top);
-        }
-        if (title !== '') {
-            params.set('title', title);
-        }
-        window.location  = '?' + params;
-    }
-
-    function resetFilter() {
-        document.getElementById('radio_filter_form_country').value = null;
-        document.getElementById('radio_filter_form_style').value = null;
-        document.getElementById('radio_filter_form_top').value = null;
-        document.getElementById('radio_filter_form_searchByTitle').value = null;
-        filter();
-    }
-
-    $("#reload").click(function(e) {
-        e.preventDefault();
-        var ajaxTime= new Date().getTime();
-        $.ajax({
-            type: 'GET',
-            url: "/radio-reload/",
-            cors: true ,
-            contentType:'application/json',
-            secure: true,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
-            beforeSend: function(){
-                $('#spinner').addClass('fa-spin');
-            },
-            success: function() {
-                $('#spinner').removeClass('fa-spin');
-                var totalTime = new Date().getTime()-ajaxTime;
-                console.log(totalTime);
-                alert('ok');
-            },
-            error: function() {
-                $('#spinner').removeClass('fa-spin');
-                alert('error');
+        document.addEventListener("DOMContentLoaded", function(){
+            const params = new URLSearchParams(document.location.search);
+            const country = params.get("country");
+            const style = params.get("style");
+            const top = params.get("top");
+            const title = params.get("title");
+            const status = params.get("status");
+            if (country) {
+                document.getElementById('radio_filter_form_country').value = country;
+            }
+            if (style) {
+                document.getElementById('radio_filter_form_style').value = style;
+            }
+            if (top) {
+                document.getElementById('radio_filter_form_top').value = top;
+            }
+            if (title) {
+                document.getElementById('radio_filter_form_searchByTitle').value = title;
+            }
+            if (status) {
+                document.getElementById('radio_filter_form_status').value = status;
             }
         });
-    })
+
+        function filter() {
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            params.delete('country');
+            params.delete('style');
+            params.delete('top');
+            params.delete('page');
+            params.delete('title');
+            params.delete('status');
+            const country = document.getElementById('radio_filter_form_country').value;
+            const style = document.getElementById('radio_filter_form_style').value;
+            const top = document.getElementById('radio_filter_form_top').value;
+            const title = document.getElementById('radio_filter_form_searchByTitle').value;
+            const status = document.getElementById('radio_filter_form_status').value;
+            if (country !== 'null') {
+                params.set('country', country);
+            }
+            if (style !== 'null') {
+                params.set('style', style);
+            }
+            if (top) {
+                params.set('top', top);
+            }
+            if (title !== '') {
+                params.set('title', title);
+            }
+            if (status !== 'null') {
+                params.set('status', status);
+            }
+            window.location  = '?' + params;
+        }
+
+        function resetFilter() {
+            document.getElementById('radio_filter_form_country').value = null;
+            document.getElementById('radio_filter_form_style').value = null;
+            document.getElementById('radio_filter_form_top').value = null;
+            document.getElementById('radio_filter_form_searchByTitle').value = null;
+            document.getElementById('radio_filter_form_status').value = null;
+            filter();
+        }
+
+        $("#reload").click(function(e) {
+            e.preventDefault();
+            var ajaxTime= new Date().getTime();
+            $.ajax({
+                type: 'GET',
+                url: "/radio-reload/",
+                cors: true ,
+                contentType:'application/json',
+                secure: true,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                },
+                beforeSend: function(){
+                    $('#spinner').addClass('fa-spin');
+                },
+                success: function() {
+                    $('#spinner').removeClass('fa-spin');
+                    var totalTime = new Date().getTime()-ajaxTime;
+                    console.log(totalTime);
+                    alert('ok');
+                },
+                error: function() {
+                    $('#spinner').removeClass('fa-spin');
+                    alert('error');
+                }
+            });
+        })
 
     </script>
 {% endblock %}

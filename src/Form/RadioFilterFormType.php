@@ -52,8 +52,15 @@ class RadioFilterFormType extends AbstractType
             ])
             ->add('top', ChoiceType::class, [
                 'choices' => [
-                    '-' => null,
+                    '-' => 'all',
                     'Active' => true,
+                ]
+            ])
+            ->add('status', ChoiceType::class, [
+                'choices' => [
+                    '-' => 'all',
+                    'Active' => 1,
+                    'Inactive' => 2,
                 ]
             ])
             ->add('searchByTitle', TextType::class, []);

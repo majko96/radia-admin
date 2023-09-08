@@ -57,8 +57,8 @@ class RadioFormType extends AbstractType
             ->add('top', ChoiceType::class, [
                 'choices' => [
                     '-' => null,
-                    'Yes' => true,
-                    'No' => false,
+                    'Yes' => 1,
+                    'No' => 0,
                 ]
             ])
             ->add('ordering', IntegerType::class, [

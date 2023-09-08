@@ -44,72 +44,43 @@ class RadioController extends AbstractController
         $style = $request->query->get('style');
         $top = $request->query->getBoolean('top');
         $title = $request->query->get('title');
-        if ($style && $country && $top && !$title) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['style' => $style, 'country' => $country, 'top' => $top,],
-                ['ordering' => 'asc']
-            );
-        } 
-        else if ($title) {
-            $qb = $entityManager->getRepository(
-                Station::class)->createQueryBuilder('u')->where('u.title like :radioTitle');
-            if ($top) {
-                $qb->andWhere('u.top = 1');
-            } 
-            if ($country) {
-                $qb->andWhere('u.country like :radioCountry');
-                $qb->setParameter('radioCountry','%' . $country . '%');
-            } 
-            if ($style){
-                $qb->andWhere('u.style like :radioStyle');
-                $qb->setParameter('radioStyle','%' . $style . '%');
-            } 
-            $qb->setParameter('radioTitle','%' . $title . '%');
-            $entity = $qb->getQuery()->getResult();
+        $status = $request->query->getInt('status');
+        $page = $request->query->getInt('page', 1);
+
+        $qb = $entityManager->getRepository(
+            Station::class)->createQueryBuilder('u')->where('u.title like :radioTitle');
+        if ($title) {
+            $qb->where('u.title like :radioTitle');
         }
-        else if ($style && $country) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['style' => $style, 'country' => $country]
-            );
-        } 
-        else if ($country && $top) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['country' => $country, 'top' => $top,],
-                ['ordering' => 'asc']
-            );
-        } 
-        else if ($style && $top) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['style' => $style, 'top' => $top,]
-            );
+        if ($top) {
+            $qb->andWhere('u.top = 1');
         }
-        else if ($country) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['country' => $country]
-            );
-        } 
-        else if ($style) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['style' => $style]
-            );
+        if ($country) {
+            $qb->andWhere('u.country like :radioCountry');
+            $qb->setParameter('radioCountry','%' . $country . '%');
         }
-        else if ($top) {
-            $entity = $entityManager->getRepository(Station::class)->findBy(
-                ['top' => $top]
-            );
+        if ($style){
+            $qb->andWhere('u.style like :radioStyle');
+            $qb->setParameter('radioStyle','%' . $style . '%');
         }
-        else {
-            $entity = $entityManager->getRepository(Station::class)->findAll();
+        if ($status === 1) {
+            $qb->andWhere('u.status = 1');
         }
+        if ($status === 2) {
+            $qb->andWhere('u.status = 0');
+        }
+        $qb->setParameter('radioTitle','%' . $title . '%');
+//        $qb->setMaxResults(self::DEFAULT_PER_PAGE);
+//        $qb->setFirstResult(self::DEFAULT_PER_PAGE * ($page - 1));
+        $entity = $qb->getQuery()->getResult();
 
         $dataPagination = $paginator->paginate(
             $entity,
-            $request->query->getInt('page', 1),
+            $page,
             self::DEFAULT_PER_PAGE
         );
-
+        
         return $this->render('radios/radioList.html.twig', [
-            'controller_name' => 'PostsController',
             'radios' => $dataPagination,
             'totalCount' => $dataPagination->getTotalItemCount(),
             'form' => $form->createView(),
@@ -224,35 +195,17 @@ class RadioController extends AbstractController
 
         foreach ($entity as $station) {
             $domain = $station->getUrl();
-            $curlInit = curl_init($domain);
-            curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
-            curl_setopt($curlInit,CURLOPT_HEADER,true);
-            curl_setopt($curlInit,CURLOPT_NOBODY,true);
-            curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
-            $response = curl_exec($curlInit);
-            $headers = false;
-            if (!$response) {
-                try {
-                    $headers = get_headers($domain);
-                    if (isset($headers[0])){
-                        if (str_contains($headers[0], '200')) {
-                            $station->setStatus(1);
-                        }
-                    }
-                } catch (Exception $e) {
-                    $station->setStatus(0);
-                }
+            $station->setStatus(1);
+            try {
+                $stream = get_headers($domain);
+            } catch (Exception $e) {
+                $stream = ['500'];
             }
-            if ($response) {
+            if (str_contains($stream[0], '302') || str_contains($stream[0], '200') || str_contains($stream[0], '301')) {
                 $station->setStatus(1);
-            }
-            if ($response && !$headers) {
-                $station->setStatus(1);
-            }
-            if (!$response && !$headers) {
+            } else {
                 $station->setStatus(0);
             }
-
             $station->setLastChecked(
                 new \DateTimeImmutable('now',
                     new \DateTimeZone('Europe/Bratislava')
@@ -268,6 +221,7 @@ class RadioController extends AbstractController
      */
     public function reloadRadioSingle(Request $request): JsonResponse
     {
+        ini_set('default_socket_timeout', 120);
         $entityManager = $this->doctrine->getManager();
         $id = $request->get('id');
         $station = $entityManager->getRepository(Station::class)->findBy(['id' => $id])[0];
@@ -276,39 +230,20 @@ class RadioController extends AbstractController
                 new \DateTimeZone('Europe/Bratislava')
             ));
         $domain = $station->getUrl();
-        $curlInit = curl_init($domain);
-        $headers = false;
-        curl_setopt($curlInit,CURLOPT_CONNECTTIMEOUT,10);
-        curl_setopt($curlInit,CURLOPT_HEADER,true);
-        curl_setopt($curlInit,CURLOPT_NOBODY,true);
-        curl_setopt($curlInit,CURLOPT_RETURNTRANSFER,true);
+
+        $station->setStatus(1);
         try {
-            $response = curl_exec($curlInit);
+            $stream = get_headers($domain);
         } catch (Exception $e) {
-            $response = false;
-        }
-        if (!$response) {
-            try {
-                $headers = get_headers($domain);
-                if (isset($headers[0])){
-                    if (str_contains($headers[0], '200')) {
-                        $station->setStatus(1);
-                    }
-                }
-            } catch (Exception $e) {
-                $station->setStatus(0);
-            }
+            $stream = ['500'];
         }
 
-        if ($response) {
+        if (str_contains($stream[0], '302') || str_contains($stream[0], '200') || str_contains($stream[0], '301')) {
             $station->setStatus(1);
-        }
-        if ($response && !$headers) {
-            $station->setStatus(1);
-        }
-        if (!$response && !$headers) {
+        } else {
             $station->setStatus(0);
         }
+
         $entityManager->flush();
         return new JsonResponse(true, 200, []);
     }

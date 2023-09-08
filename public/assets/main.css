@@ -94,3 +94,12 @@ footer {
     display: flex;
     align-items: center;
 }
+
+#playText {
+    font-weight: bold;
+}
+
+#playText:hover {
+    cursor: pointer;
+    color: #007bff;
+}
